@@ -22,6 +22,7 @@ import com.mgosu.walpaperprojects.model.wallpaper.Wallpaper;
 import com.mgosu.walpaperprojects.ultil.APIUltil;
 import com.mgosu.walpaperprojects.ultil.OnItemListener;
 import com.mgosu.walpaperprojects.view.detail.DetailActivity;
+import com.mgosu.walpaperprojects.view.detail.DetailVideoActivity;
 
 import java.util.List;
 
@@ -70,8 +71,8 @@ public class VideoFragment extends Fragment {
                 adapter_image = new AdapterImage(listItems, getActivity(), new OnItemListener() {
                     @Override
                     public void OnItemlistener(int position) {
-                        Intent intent = new Intent(getActivity(), DetailActivity.class);
-                        intent.putExtra("imageinfo", listItems.get(position));
+                        Intent intent = new Intent(getActivity(), DetailVideoActivity.class);
+                        intent.putExtra("videoinfo", listItems.get(position));
                         startActivity(intent);
                     }
                 });

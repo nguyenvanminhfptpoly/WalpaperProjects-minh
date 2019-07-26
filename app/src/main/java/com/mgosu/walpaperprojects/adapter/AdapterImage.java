@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.mgosu.walpaperprojects.R;
 import com.mgosu.walpaperprojects.model.wallpaper.ListItem;
 import com.mgosu.walpaperprojects.ultil.OnItemListener;
@@ -49,18 +50,18 @@ public class AdapterImage extends RecyclerView.Adapter<AdapterImage.ViewHodel> {
     public void onBindViewHolder(@NonNull ViewHodel viewHodel,final int i) {
         final  ListItem listItem = listItems.get(i);
 
-        Picasso.with(context).load("http://192.168.200.216/dev/media/calltools/wallpaper/"+listItem.getThumbLarge())
+        Glide.with(context).load("http://192.168.200.216/dev/media/calltools/wallpaper/"+listItem.getFileUrl())
                 .error(R.drawable.imgerror)
                 .into(viewHodel.imageView);
-        viewHodel.tvLoveDL.setText(listItem.getLoveCount()+"");
-        viewHodel.tvdownload.setText(listItem.getDownload()+"");
+        viewHodel.tvLoveDL.setText(listItem.getDownload()+"");
+        viewHodel.tvdownload.setText(listItem.getLoveCount()+"");
         viewHodel.contr.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onItemListener.OnItemlistener(i);
             }
         });
-        Log.d("fff",listItem.getThumbLarge());
+        Log.d("fff",listItem.getFileUrl());
     }
 
     @Override

@@ -3,7 +3,10 @@ package com.mgosu.walpaperprojects.view.detail;
 import android.app.WallpaperManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -12,6 +15,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.mgosu.walpaperprojects.R;
 import com.mgosu.walpaperprojects.model.wallpaper.ListItem;
 import com.mgosu.walpaperprojects.view.home.MainActivity;
@@ -51,39 +57,42 @@ public class DetailActivity extends AppCompatActivity {
     }
     private void GetInfomation(){
         ListItem listItem =(ListItem) getIntent().getSerializableExtra("imageinfo");
-        Picasso.with(getApplicationContext()).load("http://192.168.200.216/dev/media/calltools/wallpaper/"+listItem.getThumbLarge())
+        Glide.with(getApplicationContext())
+                .asBitmap()
+                .load("http://192.168.200.216/dev/media/calltools/wallpaper/"+listItem.getFileUrl())
                 .error(R.drawable.imgerror)
-                .into(mImgDetail);
+                .into(new CustomTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                        mImgDetail.setImageBitmap(resource);
+                    }
+
+                    @Override
+                    public void onLoadCleared(@Nullable Drawable placeholder) {
+
+                    }
+                });
         mTvDown.setText(listItem.getDownload()+"");
         mTvLove.setText(listItem.getLoveCount()+"");
     }
 
     private void SetWallpaper(){
-        wallpaperManager = WallpaperManager.getInstance(getApplicationContext());
-        bitmapDrawable = (BitmapDrawable) mImgDetail.getDrawable();
-        bitmap1 = bitmapDrawable.getBitmap();
-
         mBtnSetWall.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View view) {
                 GetScreenWidthHeight();
-
-                SetBitmapSize();
-
-                wallpaperManager = WallpaperManager.getInstance(getApplicationContext());
+                Bitmap bitmapImg = ((BitmapDrawable) mImgDetail.getDrawable()).getBitmap();
+                WallpaperManager wallManager = WallpaperManager.getInstance(getApplicationContext());
 
                 try {
-
-                    wallpaperManager.setBitmap(bitmap2);
-
-                    wallpaperManager.suggestDesiredDimensions(width, height);
-                    Toast.makeText(DetailActivity.this, "Thanh cong", Toast.LENGTH_SHORT).show();
-
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    wallManager.clear();
+                    wallManager.setBitmap(bitmapImg);
+                    Toast.makeText(DetailActivity.this, "Successfully", Toast.LENGTH_SHORT).show();
+                } catch (IOException ex) {
                 }
             }
         });
+
     }
     public void GetScreenWidthHeight(){
 
@@ -97,9 +106,5 @@ public class DetailActivity extends AppCompatActivity {
 
     }
 
-    public void SetBitmapSize(){
 
-        bitmap2 = Bitmap.createScaledBitmap(bitmap1, width, height, false);
-
-    }
 }
