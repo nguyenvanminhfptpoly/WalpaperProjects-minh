@@ -50,7 +50,8 @@ public class AdapterImage extends RecyclerView.Adapter<AdapterImage.ViewHodel> {
     public void onBindViewHolder(@NonNull ViewHodel viewHodel,final int i) {
         final  ListItem listItem = listItems.get(i);
 
-        Glide.with(context).load("http://192.168.200.216/dev/media/calltools/wallpaper/"+listItem.getFileUrl())
+        Glide.with(context).load("http://192.168.200.216/dev/media/calltools/wallpaper/"+listItem.getThumbLarge())
+                .placeholder(R.drawable.imgerror)
                 .error(R.drawable.imgerror)
                 .into(viewHodel.imageView);
         viewHodel.tvLoveDL.setText(listItem.getDownload()+"");
