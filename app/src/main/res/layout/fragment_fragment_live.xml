@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".view.bottombar.Fragment_live">
+    tools:context=".view.bottombar.FragmentLive">
 <android.support.constraint.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -14,7 +14,7 @@
    <android.support.v7.widget.RecyclerView
        android:layout_width="match_parent"
        android:layout_height="match_parent"
-       android:id="@+id/ryc_faglive">
+       android:id="@+id/rycView">
 
    </android.support.v7.widget.RecyclerView>
    <ProgressBar
@@ -26,7 +26,7 @@
        android:layout_marginTop="8dp"
        android:layout_marginEnd="8dp"
        android:layout_marginRight="8dp"
-       app:layout_constraintBottom_toBottomOf="@+id/ryc_faglive"
+       app:layout_constraintBottom_toBottomOf="@+id/rycView"
        app:layout_constraintEnd_toEndOf="parent"
        app:layout_constraintHorizontal_bias="0.498"
        app:layout_constraintStart_toStartOf="parent"

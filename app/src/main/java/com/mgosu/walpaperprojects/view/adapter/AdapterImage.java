@@ -1,4 +1,4 @@
-package com.mgosu.walpaperprojects.adapter;
+package com.mgosu.walpaperprojects.view.adapter;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -13,9 +13,8 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.mgosu.walpaperprojects.R;
-import com.mgosu.walpaperprojects.model.wallpaper.ListItem;
+import com.mgosu.walpaperprojects.data.model.wallpaper.ListItem;
 import com.mgosu.walpaperprojects.ultil.OnItemListener;
-import com.squareup.picasso.Picasso;
 
 import java.util.List;
 

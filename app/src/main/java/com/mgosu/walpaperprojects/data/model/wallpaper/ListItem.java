@@ -1,5 +1,5 @@
 
-package com.mgosu.walpaperprojects.model.wallpaper;
+package com.mgosu.walpaperprojects.data.model.wallpaper;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

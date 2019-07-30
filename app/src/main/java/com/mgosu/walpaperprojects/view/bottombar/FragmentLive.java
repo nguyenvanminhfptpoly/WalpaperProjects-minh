@@ -15,12 +15,13 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.mgosu.walpaperprojects.R;
-import com.mgosu.walpaperprojects.adapter.AdapterImage;
-import com.mgosu.walpaperprojects.model.wallpaper.ListItem;
-import com.mgosu.walpaperprojects.model.wallpaper.Wallpaper;
+import com.mgosu.walpaperprojects.view.adapter.AdapterImage;
+import com.mgosu.walpaperprojects.data.model.wallpaper.ListItem;
+import com.mgosu.walpaperprojects.data.model.wallpaper.Wallpaper;
 import com.mgosu.walpaperprojects.ultil.APIUltil;
 import com.mgosu.walpaperprojects.ultil.OnItemListener;
 import com.mgosu.walpaperprojects.view.detail.DetailActivity;
+import com.mgosu.walpaperprojects.view.detail.DetailLiveActivity;
 
 import java.util.List;
 
@@ -31,22 +32,22 @@ import retrofit2.Response;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class Fragment_live extends Fragment {
+public class FragmentLive extends Fragment {
 
 
     private RecyclerView.LayoutManager layoutManager;
-    private RecyclerView mRycFaglive;
+    private RecyclerView recyclerView;
 
-    private AdapterImage adapter_image;
+    private AdapterImage adapterImage;
     private ProgressBar progressBar;
-    private int page_number = 1;
-    private int item_account = 10;
+    private int mPageNumer = 1;
+    private int mTotalItem = 10;
 
     private boolean isLoading = true;
     private int visibleitem, visibleItemCount, totalItem, pre_item = 0;
     private int view_the = 10;
 
-    public Fragment_live() {
+    public FragmentLive() {
         // Required empty public constructor
 
     }
@@ -58,12 +59,12 @@ public class Fragment_live extends Fragment {
 
         // Inflate the layout for this fragment
         View v2 = inflater.inflate(R.layout.fragment_fragment_live, container, false);
-        mRycFaglive = v2.findViewById(R.id.ryc_faglive);
+        recyclerView = v2.findViewById(R.id.rycView);
 
-        mRycFaglive.setHasFixedSize(true);
+        recyclerView.setHasFixedSize(true);
 
         layoutManager = new GridLayoutManager(getActivity(), 2);
-        mRycFaglive.setLayoutManager(layoutManager);
+        recyclerView.setLayoutManager(layoutManager);
 
         progressBar = v2.findViewById(R.id.progress);
         progressBar.setVisibility(View.VISIBLE);
@@ -73,15 +74,15 @@ public class Fragment_live extends Fragment {
                 final List<ListItem> listItems = response.body().getData().getListItems();
 
 
-                adapter_image = new AdapterImage(listItems, getActivity(), new OnItemListener() {
+                adapterImage = new AdapterImage(listItems, getActivity(), new OnItemListener() {
                     @Override
                     public void OnItemlistener(int position) {
-                        Intent intent = new Intent(getActivity(), DetailActivity.class);
-                        intent.putExtra("imageinfo", listItems.get(position));
+                        Intent intent = new Intent(getActivity(), DetailLiveActivity.class);
+                        intent.putExtra("imagelive", listItems.get(position));
                         startActivity(intent);
                     }
                 });
-                mRycFaglive.setAdapter(adapter_image);
+                recyclerView.setAdapter(adapterImage);
                 Log.d("abc", response.body().getData().getListItems().toString());
                 // khoi tao adapter roi bo vao hien thi thoi e
                 progressBar.setVisibility(View.GONE);
@@ -93,7 +94,7 @@ public class Fragment_live extends Fragment {
 
             }
         });
-        mRycFaglive.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
@@ -104,7 +105,7 @@ public class Fragment_live extends Fragment {
                 super.onScrolled(recyclerView, dx, dy);
                 visibleItemCount = layoutManager.getChildCount();
                 totalItem = layoutManager.getItemCount();
-                visibleitem = ((GridLayoutManager) mRycFaglive.getLayoutManager()).findFirstVisibleItemPosition();
+                visibleitem = ((GridLayoutManager) recyclerView.getLayoutManager()).findFirstVisibleItemPosition();
                 if (dy > 0) {
                     if (isLoading) {
                         if (totalItem > pre_item) {
@@ -113,8 +114,8 @@ public class Fragment_live extends Fragment {
                         }
                     }
                     if (!isLoading && (totalItem - visibleItemCount) <= (visibleitem + view_the)) {
-                        page_number++;
-                        loadmore();
+                        mPageNumer++;
+                        loadMore();
                         isLoading = true;
                     }
                 }
@@ -124,7 +125,7 @@ public class Fragment_live extends Fragment {
     }
 
 
-    private void loadmore() {
+    private void loadMore() {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -133,7 +134,7 @@ public class Fragment_live extends Fragment {
                     @Override
                     public void onResponse(Call<Wallpaper> call, Response<Wallpaper> response) {
                         final List<ListItem> listItems = response.body().getData().getListItems();
-                        adapter_image.addImage(listItems);
+                        adapterImage.addImage(listItems);
                         progressBar.setVisibility(View.GONE);
                     }
 

@@ -2,7 +2,7 @@ package com.mgosu.walpaperprojects.ultil;
 
 
 
-import com.mgosu.walpaperprojects.model.wallpaper.Wallpaper;
+import com.mgosu.walpaperprojects.data.model.wallpaper.Wallpaper;
 
 import retrofit2.Call;
 import retrofit2.http.Field;

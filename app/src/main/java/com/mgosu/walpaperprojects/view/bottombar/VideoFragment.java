@@ -13,15 +13,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.mgosu.walpaperprojects.R;
-import com.mgosu.walpaperprojects.adapter.AdapterImage;
-import com.mgosu.walpaperprojects.model.wallpaper.ListItem;
-import com.mgosu.walpaperprojects.model.wallpaper.Wallpaper;
+import com.mgosu.walpaperprojects.view.adapter.AdapterImage;
+import com.mgosu.walpaperprojects.data.model.wallpaper.ListItem;
+import com.mgosu.walpaperprojects.data.model.wallpaper.Wallpaper;
 import com.mgosu.walpaperprojects.ultil.APIUltil;
 import com.mgosu.walpaperprojects.ultil.OnItemListener;
-import com.mgosu.walpaperprojects.view.detail.DetailActivity;
 import com.mgosu.walpaperprojects.view.detail.DetailVideoActivity;
 
 import java.util.List;
@@ -36,39 +34,39 @@ import retrofit2.Response;
 public class VideoFragment extends Fragment {
 
     private RecyclerView.LayoutManager layoutManager;
-    private AdapterImage adapter_image;
-    private RecyclerView mRycFagvideo;
+    private AdapterImage adapterImage;
+    private RecyclerView recyclerView;
     public VideoFragment() {
         // Required empty public constructor
 
     }
     private ProgressBar progressBar;
-    private int page_number = 1;
-    private int item_account = 10;
+    private int mPageNumber = 1;
+    private int mItemCount = 10;
 
     private boolean isLoading  = true;
-    private int visibleitem,visibleItemCount,totalItem,pre_item = 0;
+    private int visibleitem,visibleItemCount,totalItem, preItem = 0;
     private int view_the = 10;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v2 = inflater.inflate(R.layout.fragment_video, container, false);
-        mRycFagvideo = v2.findViewById(R.id.ryc_fagvideo);
+        recyclerView = v2.findViewById(R.id.ryc_fagvideo);
 
 
         progressBar = v2.findViewById(R.id.progress);
         progressBar.setVisibility(View.VISIBLE);
 
-        mRycFagvideo.setHasFixedSize(true);
+        recyclerView.setHasFixedSize(true);
         layoutManager = new GridLayoutManager(getActivity(),2);
-        mRycFagvideo.setLayoutManager(layoutManager);
+        recyclerView.setLayoutManager(layoutManager);
         APIUltil.getData().getWallpaper("list_item", "video", "1", "20").enqueue(new Callback<Wallpaper>() {
             @Override
             public void onResponse(Call<Wallpaper> call, Response<Wallpaper> response) {
                 final List<ListItem> listItems = response.body().getData().getListItems();
 
-                adapter_image = new AdapterImage(listItems, getActivity(), new OnItemListener() {
+                adapterImage = new AdapterImage(listItems, getActivity(), new OnItemListener() {
                     @Override
                     public void OnItemlistener(int position) {
                         Intent intent = new Intent(getActivity(), DetailVideoActivity.class);
@@ -76,7 +74,7 @@ public class VideoFragment extends Fragment {
                         startActivity(intent);
                     }
                 });
-                mRycFagvideo.setAdapter(adapter_image);
+                recyclerView.setAdapter(adapterImage);
                 Log.d("abc",response.body().getData().getListItems().toString());
                 // khoi tao adapter roi bo vao hien thi thoi e
                 progressBar.setVisibility(View.GONE);
@@ -89,7 +87,7 @@ public class VideoFragment extends Fragment {
 
             }
         });
-        mRycFagvideo.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
@@ -100,16 +98,16 @@ public class VideoFragment extends Fragment {
                 super.onScrolled(recyclerView, dx, dy);
                 visibleItemCount = layoutManager.getChildCount();
                 totalItem = layoutManager.getItemCount();
-                visibleitem = ((GridLayoutManager)mRycFagvideo.getLayoutManager()).findFirstVisibleItemPosition();
+                visibleitem = ((GridLayoutManager) VideoFragment.this.recyclerView.getLayoutManager()).findFirstVisibleItemPosition();
                 if(dy>0){
                     if(isLoading){
-                        if(totalItem > pre_item){
+                        if(totalItem > preItem){
                             isLoading = false;
-                            pre_item = totalItem;
+                            preItem = totalItem;
                         }
                     }
                     if(!isLoading && (totalItem - visibleItemCount) <= (visibleitem + view_the)){
-                        page_number++;
+                        mPageNumber++;
                         loadmore();
                         isLoading = true;
                     }
@@ -127,7 +125,7 @@ public class VideoFragment extends Fragment {
                     @Override
                     public void onResponse(Call<Wallpaper> call, Response<Wallpaper> response) {
                         final List<ListItem> listItems = response.body().getData().getListItems();
-                        adapter_image.addImage(listItems);
+                        adapterImage.addImage(listItems);
                         progressBar.setVisibility(View.GONE);
                     }
 
