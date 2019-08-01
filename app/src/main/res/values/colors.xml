@@ -8,4 +8,5 @@
   <color name="red">#FF0000</color>
   <color name="black2">#40111010</color>
   <color name="den">#222121</color>
+    <color name="wwhiteblur">#3AFFFFFF</color>
 </resources>

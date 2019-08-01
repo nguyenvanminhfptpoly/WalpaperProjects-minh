@@ -150,7 +150,6 @@ public class DetailVideoActivity extends AppCompatActivity {
         ListItem item = (ListItem) getIntent().getSerializableExtra("videoinfo");
         videourl = "http://192.168.200.216/dev/media/calltools/wallpaper/" + item.getFileUrl();
         new DownloadFileFromURL().execute(videourl);
-
         binding.videoView2.setVideoURI(Uri.parse(videourl));
         binding.videoView2.start();
         binding.textView2.setText(item.getLoveCount() + "");
@@ -168,7 +167,6 @@ public class DetailVideoActivity extends AppCompatActivity {
         binding.button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 Intent intent = new Intent(
                         WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
                 intent.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
@@ -217,6 +215,7 @@ public class DetailVideoActivity extends AppCompatActivity {
 
                 // Output stream to write file
                 Application.path = root + "/downloadedfile.mp4";
+
                 Log.d("///", Application.path);
                 OutputStream output = new FileOutputStream(Application.path);
                 byte data[] = new byte[1024];
