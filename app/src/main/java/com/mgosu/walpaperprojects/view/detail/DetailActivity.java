@@ -30,6 +30,7 @@ import com.bumptech.glide.request.transition.Transition;
 import com.mgosu.walpaperprojects.R;
 import com.mgosu.walpaperprojects.data.model.wallpaper.ListItem;
 import com.mgosu.walpaperprojects.databinding.ActivityDetailBinding;
+import com.mgosu.walpaperprojects.ultil.CheckConnection;
 
 import java.io.IOException;
 
@@ -45,11 +46,18 @@ public class DetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this,R.layout.activity_detail);
-        initView();
-        GetInfomation();
+        CheckConnect();
+    }
+    private void CheckConnect(){
+        if(CheckConnection.haveNetworkConnection(getApplicationContext())) {
+            GetInfomation();
+            initView();
+        }else{
+            CheckConnection.showToast_short(getApplicationContext(), "Connect Error");
+        }
+
 
     }
-
     private void initView() {
         setSupportActionBar(binding.toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

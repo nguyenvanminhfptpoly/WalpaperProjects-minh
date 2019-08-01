@@ -18,7 +18,7 @@ public class MyWallpaperService extends WallpaperService {
 
     @Override
     public void onCreate() {
-        Log.d("///", pathVideo);
+
         pathVideo = Application.path;
         super.onCreate();
     }

@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.mgosu.walpaperprojects.R;
+import com.mgosu.walpaperprojects.ultil.CheckConnection;
 import com.mgosu.walpaperprojects.view.adapter.AdapterImage;
 import com.mgosu.walpaperprojects.data.model.wallpaper.ListItem;
 import com.mgosu.walpaperprojects.data.model.wallpaper.Wallpaper;
@@ -61,32 +62,18 @@ public class VideoFragment extends Fragment {
         recyclerView.setHasFixedSize(true);
         layoutManager = new GridLayoutManager(getActivity(),2);
         recyclerView.setLayoutManager(layoutManager);
-        APIUltil.getData().getWallpaper("list_item", "video", "1", "20").enqueue(new Callback<Wallpaper>() {
-            @Override
-            public void onResponse(Call<Wallpaper> call, Response<Wallpaper> response) {
-                final List<ListItem> listItems = response.body().getData().getListItems();
-
-                adapterImage = new AdapterImage(listItems, getActivity(), new OnItemListener() {
-                    @Override
-                    public void OnItemlistener(int position) {
-                        Intent intent = new Intent(getActivity(), DetailVideoActivity.class);
-                        intent.putExtra("videoinfo", listItems.get(position));
-                        startActivity(intent);
-                    }
-                });
-                recyclerView.setAdapter(adapterImage);
-                Log.d("abc",response.body().getData().getListItems().toString());
-                // khoi tao adapter roi bo vao hien thi thoi e
-                progressBar.setVisibility(View.GONE);
-
-            }
-
-            @Override
-            public void onFailure(Call<Wallpaper> call, Throwable t) {
-                Log.e("FF", t.getMessage());
-
-            }
-        });
+        CheckConnect();
+        return v2;
+    }
+    private void CheckConnect(){
+        if(CheckConnection.haveNetworkConnection(getActivity())){
+            AddOnScroolRecyclerview();
+            GetDataFormAPI();
+        }else {
+            CheckConnection.showToast_short(getActivity(),"Connect Error");
+        }
+    }
+    private void AddOnScroolRecyclerview(){
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
@@ -114,7 +101,34 @@ public class VideoFragment extends Fragment {
                 }
             }
         });
-        return v2;
+    }
+    private void GetDataFormAPI(){
+        APIUltil.getData().getWallpaper("list_item", "video", "1", "20").enqueue(new Callback<Wallpaper>() {
+            @Override
+            public void onResponse(Call<Wallpaper> call, Response<Wallpaper> response) {
+                final List<ListItem> listItems = response.body().getData().getListItems();
+
+                adapterImage = new AdapterImage(listItems, getActivity(), new OnItemListener() {
+                    @Override
+                    public void OnItemlistener(int position) {
+                        Intent intent = new Intent(getActivity(), DetailVideoActivity.class);
+                        intent.putExtra("videoinfo", listItems.get(position));
+                        startActivity(intent);
+                    }
+                });
+                recyclerView.setAdapter(adapterImage);
+                Log.d("abc",response.body().getData().getListItems().toString());
+                // khoi tao adapter roi bo vao hien thi thoi e
+                progressBar.setVisibility(View.GONE);
+
+            }
+
+            @Override
+            public void onFailure(Call<Wallpaper> call, Throwable t) {
+                Log.e("FF", t.getMessage());
+
+            }
+        });
     }
     private void loadmore(){
         new Handler().postDelayed(new Runnable() {

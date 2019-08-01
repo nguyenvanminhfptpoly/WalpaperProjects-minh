@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.mgosu.walpaperprojects.R;
+import com.mgosu.walpaperprojects.ultil.CheckConnection;
 import com.mgosu.walpaperprojects.view.adapter.AdapterImage;
 import com.mgosu.walpaperprojects.data.model.wallpaper.ListItem;
 import com.mgosu.walpaperprojects.data.model.wallpaper.Wallpaper;
@@ -56,7 +57,6 @@ public class FragmentLive extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         // Inflate the layout for this fragment
         View v2 = inflater.inflate(R.layout.fragment_fragment_live, container, false);
         recyclerView = v2.findViewById(R.id.rycView);
@@ -67,33 +67,18 @@ public class FragmentLive extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
 
         progressBar = v2.findViewById(R.id.progress);
-        progressBar.setVisibility(View.VISIBLE);
-        APIUltil.getData().getWallpaper("list_item", "3d", "1", "20").enqueue(new Callback<Wallpaper>() {
-            @Override
-            public void onResponse(Call<Wallpaper> call, Response<Wallpaper> response) {
-                final List<ListItem> listItems = response.body().getData().getListItems();
-
-
-                adapterImage = new AdapterImage(listItems, getActivity(), new OnItemListener() {
-                    @Override
-                    public void OnItemlistener(int position) {
-                        Intent intent = new Intent(getActivity(), DetailLiveActivity.class);
-                        intent.putExtra("imagelive", listItems.get(position));
-                        startActivity(intent);
-                    }
-                });
-                recyclerView.setAdapter(adapterImage);
-                Log.d("abc", response.body().getData().getListItems().toString());
-                // khoi tao adapter roi bo vao hien thi thoi e
-                progressBar.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onFailure(Call<Wallpaper> call, Throwable t) {
-                Log.e("FF", t.getMessage());
-
-            }
-        });
+         CheckConnect();
+        return v2;
+    }
+    private void CheckConnect(){
+        if(CheckConnection.haveNetworkConnection(getActivity())){
+            GetDataFromAPI();
+            AddOnScrollRecyclerview();
+        }else {
+            CheckConnection.showToast_short(getActivity(), "Connect Error");
+        }
+    }
+    private void AddOnScrollRecyclerview(){
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
@@ -121,10 +106,36 @@ public class FragmentLive extends Fragment {
                 }
             }
         });
-        return v2;
     }
+    private void GetDataFromAPI(){
+        progressBar.setVisibility(View.VISIBLE);
+        APIUltil.getData().getWallpaper("list_item", "3d", "1", "20").enqueue(new Callback<Wallpaper>() {
+            @Override
+            public void onResponse(Call<Wallpaper> call, Response<Wallpaper> response) {
+                final List<ListItem> listItems = response.body().getData().getListItems();
 
 
+                adapterImage = new AdapterImage(listItems, getActivity(), new OnItemListener() {
+                    @Override
+                    public void OnItemlistener(int position) {
+                        Intent intent = new Intent(getActivity(), DetailLiveActivity.class);
+                        intent.putExtra("imagelive", listItems.get(position));
+                        startActivity(intent);
+                    }
+                });
+                recyclerView.setAdapter(adapterImage);
+                Log.d("abc", response.body().getData().getListItems().toString());
+                // khoi tao adapter roi bo vao hien thi thoi e
+                progressBar.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onFailure(Call<Wallpaper> call, Throwable t) {
+                Log.e("FF", t.getMessage());
+
+            }
+        });
+    }
     private void loadMore() {
         new Handler().postDelayed(new Runnable() {
             @Override

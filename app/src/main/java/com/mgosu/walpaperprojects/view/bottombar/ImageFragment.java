@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.mgosu.walpaperprojects.R;
+import com.mgosu.walpaperprojects.ultil.CheckConnection;
 import com.mgosu.walpaperprojects.view.adapter.AdapterImage;
 import com.mgosu.walpaperprojects.data.model.wallpaper.ListItem;
 import com.mgosu.walpaperprojects.data.model.wallpaper.Wallpaper;
@@ -57,36 +58,23 @@ public class ImageFragment extends Fragment {
         recyclerView = v2.findViewById(R.id.ryc_fagimg);
         recyclerView.setHasFixedSize(true);
         progressBar = v2.findViewById(R.id.progress);
-        progressBar.setVisibility(View.VISIBLE);
+
 
         layoutManager = new GridLayoutManager(getActivity(),2);
         recyclerView.setLayoutManager(layoutManager);
-        APIUltil.getData().getWallpaper("list_item", "image", "1", "20").enqueue(new Callback<Wallpaper>() {
-            @Override
-            public void onResponse(Call<Wallpaper> call, Response<Wallpaper> response) {
-                final List<ListItem> listItems = response.body().getData().getListItems();
 
-                adapterImage = new AdapterImage(listItems, getActivity(), new OnItemListener() {
-                    @Override
-                    public void OnItemlistener(int position) {
-                        Intent intent = new Intent(getActivity(), DetailActivity.class);
-                        intent.putExtra("imageinfo", listItems.get(position));
-                        startActivity(intent);
-                    }
-                });
-                recyclerView.setAdapter(adapterImage);
-                Log.d("abc",response.body().getData().getListItems().toString());
-                // khoi tao adapter roi bo vao hien thi thoi e
-                progressBar.setVisibility(View.GONE);
-
-            }
-
-            @Override
-            public void onFailure(Call<Wallpaper> call, Throwable t) {
-                Log.e("FF", t.getMessage());
-
-            }
-        });
+        CheckConnect();
+        return v2;
+    }
+    private void CheckConnect(){
+        if(CheckConnection.haveNetworkConnection(getActivity())){
+            AddOnScroolRecyclerview();
+            GetDataFormAPI();
+        }else {
+            CheckConnection.showToast_short(getActivity(), "Connect Error");
+        }
+    }
+    private void AddOnScroolRecyclerview(){
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
@@ -114,9 +102,36 @@ public class ImageFragment extends Fragment {
                 }
             }
         });
-        return v2;
     }
+    private void GetDataFormAPI(){
+        progressBar.setVisibility(View.VISIBLE);
+        APIUltil.getData().getWallpaper("list_item", "image", "1", "20").enqueue(new Callback<Wallpaper>() {
+            @Override
+            public void onResponse(Call<Wallpaper> call, Response<Wallpaper> response) {
+                final List<ListItem> listItems = response.body().getData().getListItems();
 
+                adapterImage = new AdapterImage(listItems, getActivity(), new OnItemListener() {
+                    @Override
+                    public void OnItemlistener(int position) {
+                        Intent intent = new Intent(getActivity(), DetailActivity.class);
+                        intent.putExtra("imageinfo", listItems.get(position));
+                        startActivity(intent);
+                    }
+                });
+                recyclerView.setAdapter(adapterImage);
+                Log.d("abc",response.body().getData().getListItems().toString());
+                // khoi tao adapter roi bo vao hien thi thoi e
+                progressBar.setVisibility(View.GONE);
+
+            }
+
+            @Override
+            public void onFailure(Call<Wallpaper> call, Throwable t) {
+                Log.e("FF", t.getMessage());
+
+            }
+        });
+    }
     private void loadmore(){
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -140,32 +155,4 @@ public class ImageFragment extends Fragment {
         }, 1500);
 
     }
-//    private void GetListItem(){
-//        dataClient = apiUltil.getData();
-//
-//        Call<List<ListItem>> listCall = dataClient.getList();
-//
-//        listCall.enqueue(new Callback<List<ListItem>>() {
-//            @Override
-//            public void onResponse(Call<List<ListItem>> call, Response<List<ListItem>> response) {
-//                if(!response.isSuccessful()){
-//                    textView.setText("COde" + response.code());
-//                    return;
-//                }
-//                List<ListItem> posts = response.body();
-//                for (ListItem post: posts){
-//                    String content="";
-//
-//                    content += "Itemid: "+ post.getItemId() + "\n\n";
-//
-//                    textView.append(content);
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Call<List<ListItem>> call, Throwable t) {
-//                Toast.makeText(getContext(), "Failed", Toast.LENGTH_SHORT).show();
-//            }
-//        });
-//    }
 }
