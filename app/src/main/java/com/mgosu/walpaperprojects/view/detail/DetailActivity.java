@@ -47,11 +47,12 @@ public class DetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this,R.layout.activity_detail);
         CheckConnect();
+        initView();
     }
     private void CheckConnect(){
         if(CheckConnection.haveNetworkConnection(getApplicationContext())) {
             GetInfomation();
-            initView();
+
         }else{
             CheckConnection.showToast_short(getApplicationContext(), "Connect Error");
         }
@@ -59,12 +60,12 @@ public class DetailActivity extends AppCompatActivity {
 
     }
     private void initView() {
-        setSupportActionBar(binding.toolbar);
+        setSupportActionBar(binding.toolbar2);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        binding.toolbar.setSubtitleTextColor(Color.WHITE);
+        binding.toolbar2.setSubtitleTextColor(Color.WHITE);
 
-        binding.btnSetWall.setOnClickListener(new View.OnClickListener() {
+        binding.button3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(DetailActivity.this);
@@ -83,7 +84,7 @@ public class DetailActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View view) {
                         GetScreenWidthHeight();
-                        Bitmap bitmapImg = ((BitmapDrawable) binding.imgDetail.getDrawable()).getBitmap();
+                        Bitmap bitmapImg = ((BitmapDrawable) binding.imageView3.getDrawable()).getBitmap();
                         WallpaperManager wallManager = WallpaperManager.getInstance(getApplicationContext());
 
                         try {
@@ -104,7 +105,7 @@ public class DetailActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View view) {
                         GetScreenWidthHeight();
-                        Bitmap bitmapImg = ((BitmapDrawable) binding.imgDetail.getDrawable()).getBitmap();
+                        Bitmap bitmapImg = ((BitmapDrawable) binding.imageView3.getDrawable()).getBitmap();
                         WallpaperManager wallManager = WallpaperManager.getInstance(getApplicationContext());
 
                         try {
@@ -122,7 +123,7 @@ public class DetailActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View view) {
                         GetScreenWidthHeight();
-                        Bitmap bitmapImg = ((BitmapDrawable) binding.imgDetail.getDrawable()).getBitmap();
+                        Bitmap bitmapImg = ((BitmapDrawable) binding.imageView3.getDrawable()).getBitmap();
                         WallpaperManager wallManager = WallpaperManager.getInstance(getApplicationContext());
 
                         try {
@@ -160,7 +161,7 @@ public class DetailActivity extends AppCompatActivity {
                 .into(new CustomTarget<Bitmap>() {
                     @Override
                     public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                        binding.imgDetail.setImageBitmap(resource);
+                        binding.imageView3.setImageBitmap(resource);
                     }
 
                     @Override
@@ -168,8 +169,8 @@ public class DetailActivity extends AppCompatActivity {
 
                     }
                 });
-        binding.tvDown.setText(listItem.getDownload() + "");
-        binding.tvLove.setText(listItem.getLoveCount() + "");
+        binding.textView8.setText(listItem.getDownload() + "");
+        binding.textView9.setText(listItem.getLoveCount() + "");
     }
 
 
@@ -179,9 +180,10 @@ public class DetailActivity extends AppCompatActivity {
 
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
 
-        width = displayMetrics.widthPixels;
+        width = getWindowManager().getDefaultDisplay().getWidth();
 
-        height = displayMetrics.heightPixels;
+        height = getWindowManager().getDefaultDisplay()
+                .getHeight();
 
     }
 

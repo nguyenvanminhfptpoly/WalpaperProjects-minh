@@ -21,6 +21,7 @@ import com.mgosu.walpaperprojects.data.model.wallpaper.ListItem;
 import com.mgosu.walpaperprojects.data.model.wallpaper.Wallpaper;
 import com.mgosu.walpaperprojects.ultil.APIUltil;
 import com.mgosu.walpaperprojects.ultil.OnItemListener;
+import com.mgosu.walpaperprojects.view.adapter.RecyclerviewAdapter;
 import com.mgosu.walpaperprojects.view.detail.DetailVideoActivity;
 
 import java.util.List;
@@ -35,19 +36,18 @@ import retrofit2.Response;
 public class VideoFragment extends Fragment {
 
     private RecyclerView.LayoutManager layoutManager;
-    private AdapterImage adapterImage;
+//    private AdapterImage adapterImage;
     private RecyclerView recyclerView;
     public VideoFragment() {
         // Required empty public constructor
 
     }
     private ProgressBar progressBar;
-    private int mPageNumber = 1;
-    private int mItemCount = 10;
+    List<ListItem> listItems;
+    private RecyclerviewAdapter adapter;
+    Handler handler;
 
-    private boolean isLoading  = true;
-    private int visibleitem,visibleItemCount,totalItem, preItem = 0;
-    private int view_the = 10;
+    boolean isLoading = false;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -67,13 +67,13 @@ public class VideoFragment extends Fragment {
     }
     private void CheckConnect(){
         if(CheckConnection.haveNetworkConnection(getActivity())){
-            AddOnScroolRecyclerview();
+            AddOnScrollRecyclerview();
             GetDataFormAPI();
         }else {
             CheckConnection.showToast_short(getActivity(),"Connect Error");
         }
     }
-    private void AddOnScroolRecyclerview(){
+    public void AddOnScrollRecyclerview(){
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
@@ -83,22 +83,19 @@ public class VideoFragment extends Fragment {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                visibleItemCount = layoutManager.getChildCount();
-                totalItem = layoutManager.getItemCount();
-                visibleitem = ((GridLayoutManager) VideoFragment.this.recyclerView.getLayoutManager()).findFirstVisibleItemPosition();
-                if(dy>0){
-                    if(isLoading){
-                        if(totalItem > preItem){
-                            isLoading = false;
-                            preItem = totalItem;
+                try {
+                    layoutManager =  recyclerView.getLayoutManager();
+                    if(!isLoading){
+                        if(layoutManager != null && ((GridLayoutManager) layoutManager).findLastCompletelyVisibleItemPosition() == listItems.size() - 1){
+                            Loadmore();
+                            isLoading = true;
                         }
                     }
-                    if(!isLoading && (totalItem - visibleItemCount) <= (visibleitem + view_the)){
-                        mPageNumber++;
-                        loadmore();
-                        isLoading = true;
-                    }
+                }catch (Exception e){
+                    e.printStackTrace();
                 }
+
+
             }
         });
     }
@@ -106,9 +103,9 @@ public class VideoFragment extends Fragment {
         APIUltil.getData().getWallpaper("list_item", "video", "1", "20").enqueue(new Callback<Wallpaper>() {
             @Override
             public void onResponse(Call<Wallpaper> call, Response<Wallpaper> response) {
-                final List<ListItem> listItems = response.body().getData().getListItems();
+                 listItems = response.body().getData().getListItems();
 
-                adapterImage = new AdapterImage(listItems, getActivity(), new OnItemListener() {
+                adapter = new RecyclerviewAdapter(listItems, getActivity(), new OnItemListener() {
                     @Override
                     public void OnItemlistener(int position) {
                         Intent intent = new Intent(getActivity(), DetailVideoActivity.class);
@@ -116,7 +113,7 @@ public class VideoFragment extends Fragment {
                         startActivity(intent);
                     }
                 });
-                recyclerView.setAdapter(adapterImage);
+                recyclerView.setAdapter(adapter);
                 Log.d("abc",response.body().getData().getListItems().toString());
                 // khoi tao adapter roi bo vao hien thi thoi e
                 progressBar.setVisibility(View.GONE);
@@ -130,27 +127,24 @@ public class VideoFragment extends Fragment {
             }
         });
     }
-    private void loadmore(){
-        new Handler().postDelayed(new Runnable() {
+    private void Loadmore(){
+        listItems.add(null);
+        adapter.notifyItemInserted(listItems.size() - 1);
+
+        Handler handler = new Handler();
+
+        handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                progressBar.setVisibility(View.VISIBLE);
-                APIUltil.getData().getWallpaper("list_item", "video", "1", "20").enqueue(new Callback<Wallpaper>() {
-                    @Override
-                    public void onResponse(Call<Wallpaper> call, Response<Wallpaper> response) {
-                        final List<ListItem> listItems = response.body().getData().getListItems();
-                        adapterImage.addImage(listItems);
-                        progressBar.setVisibility(View.GONE);
-                    }
+                listItems.remove(listItems.size() - 1);
+                int scrollposition = listItems.size();
+                adapter.notifyItemRemoved(scrollposition);
 
-                    @Override
-                    public void onFailure(Call<Wallpaper> call, Throwable t) {
-                        Log.e("FF", t.getMessage());
-
-                    }
-                });
+                adapter.notifyDataSetChanged();
+                isLoading = false;
             }
         }, 1500);
+
 
     }
 }

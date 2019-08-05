@@ -46,21 +46,23 @@ public class DetailLiveActivity extends AppCompatActivity  {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_detail_live);
        CheckConnect();
+        initView();
     }
     private void CheckConnect(){
         if(CheckConnection.haveNetworkConnection(getApplicationContext())){
             GetInformation();
-            initView();
+
             setWall();
         }else {
             CheckConnection.showToast_short(getApplicationContext(), "Connect Error");
         }
     }
     private void initView(){
-        setSupportActionBar(binding.toolbar);
+        binding.toolbar4.setTitle("Detail Live");
+        setSupportActionBar(binding.toolbar4);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        binding.toolbar.setSubtitleTextColor(Color.WHITE);
+        binding.toolbar4.setSubtitleTextColor(Color.WHITE);
     }
 
     private void GetInformation() {
@@ -72,7 +74,7 @@ public class DetailLiveActivity extends AppCompatActivity  {
                 .into(new CustomTarget<Bitmap>() {
                     @Override
                     public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                        binding.videoView2.setImageBitmap(resource);
+                        binding.imageView2.setImageBitmap(resource);
                     }
 
                     @Override
@@ -112,7 +114,7 @@ public class DetailLiveActivity extends AppCompatActivity  {
             @Override
             public void onClick(View view) {
                 GetScreenWidthHeight();
-                Bitmap bitmapImg = ((BitmapDrawable) binding.videoView2.getDrawable()).getBitmap();
+                Bitmap bitmapImg = ((BitmapDrawable) binding.imageView2.getDrawable()).getBitmap();
                 WallpaperManager wallManager = WallpaperManager.getInstance(getApplicationContext());
 
                 try {
@@ -133,7 +135,7 @@ public class DetailLiveActivity extends AppCompatActivity  {
             @Override
             public void onClick(View view) {
                 GetScreenWidthHeight();
-                Bitmap bitmapImg = ((BitmapDrawable) binding.videoView2.getDrawable()).getBitmap();
+                Bitmap bitmapImg = ((BitmapDrawable) binding.imageView2.getDrawable()).getBitmap();
                 WallpaperManager wallManager = WallpaperManager.getInstance(getApplicationContext());
 
                 try {
@@ -152,7 +154,7 @@ public class DetailLiveActivity extends AppCompatActivity  {
             @Override
             public void onClick(View view) {
                 GetScreenWidthHeight();
-                Bitmap bitmapImg = ((BitmapDrawable) binding.videoView2.getDrawable()).getBitmap();
+                Bitmap bitmapImg = ((BitmapDrawable) binding.imageView2.getDrawable()).getBitmap();
                 WallpaperManager wallManager = WallpaperManager.getInstance(getApplicationContext());
 
                 try {

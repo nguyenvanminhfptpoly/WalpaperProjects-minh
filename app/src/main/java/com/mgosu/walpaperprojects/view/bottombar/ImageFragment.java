@@ -21,6 +21,7 @@ import com.mgosu.walpaperprojects.data.model.wallpaper.ListItem;
 import com.mgosu.walpaperprojects.data.model.wallpaper.Wallpaper;
 import com.mgosu.walpaperprojects.ultil.APIUltil;
 import com.mgosu.walpaperprojects.ultil.OnItemListener;
+import com.mgosu.walpaperprojects.view.adapter.RecyclerviewAdapter;
 import com.mgosu.walpaperprojects.view.detail.DetailActivity;
 
 import java.util.List;
@@ -35,16 +36,15 @@ import retrofit2.Response;
 public class ImageFragment extends Fragment {
 
     private RecyclerView.LayoutManager layoutManager;
-    private AdapterImage adapterImage;
+//    private AdapterImage adapterImage;
 
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
-    private int mPageNumber = 1;
-    private int mItemCount = 10;
+    List<ListItem> listItems;
+    private RecyclerviewAdapter adapter;
+    Handler handler;
 
-    private boolean isLoading  = true;
-    private int visibleitem,visibleItemCount,totalItem,pre_item = 0;
-    private int viewThe = 10;
+    boolean isLoading = false;
     public ImageFragment() {
         // Required empty public constructor
     }
@@ -68,13 +68,13 @@ public class ImageFragment extends Fragment {
     }
     private void CheckConnect(){
         if(CheckConnection.haveNetworkConnection(getActivity())){
-            AddOnScroolRecyclerview();
+            AddOnScrollRecyclerview();
             GetDataFormAPI();
         }else {
             CheckConnection.showToast_short(getActivity(), "Connect Error");
         }
     }
-    private void AddOnScroolRecyclerview(){
+    private void AddOnScrollRecyclerview(){
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
@@ -84,22 +84,14 @@ public class ImageFragment extends Fragment {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                visibleItemCount = layoutManager.getChildCount();
-                totalItem = layoutManager.getItemCount();
-                visibleitem = ((GridLayoutManager) ImageFragment.this.recyclerView.getLayoutManager()).findFirstVisibleItemPosition();
-                if(dy>0){
-                    if(isLoading){
-                        if(totalItem > pre_item){
-                            isLoading = false;
-                            pre_item = totalItem;
-                        }
-                    }
-                    if(!isLoading && (totalItem - visibleItemCount) <= (visibleitem + viewThe)){
-                        mPageNumber++;
-                        loadmore();
+                layoutManager = (GridLayoutManager) recyclerView.getLayoutManager();
+                if(!isLoading){
+                    if(layoutManager != null && ((GridLayoutManager) layoutManager).findLastCompletelyVisibleItemPosition() == listItems.size() - 1){
+                        Loadmore();
                         isLoading = true;
                     }
                 }
+
             }
         });
     }
@@ -108,9 +100,9 @@ public class ImageFragment extends Fragment {
         APIUltil.getData().getWallpaper("list_item", "image", "1", "20").enqueue(new Callback<Wallpaper>() {
             @Override
             public void onResponse(Call<Wallpaper> call, Response<Wallpaper> response) {
-                final List<ListItem> listItems = response.body().getData().getListItems();
+                 listItems = response.body().getData().getListItems();
 
-                adapterImage = new AdapterImage(listItems, getActivity(), new OnItemListener() {
+                adapter = new RecyclerviewAdapter(listItems, getActivity(), new OnItemListener() {
                     @Override
                     public void OnItemlistener(int position) {
                         Intent intent = new Intent(getActivity(), DetailActivity.class);
@@ -118,7 +110,7 @@ public class ImageFragment extends Fragment {
                         startActivity(intent);
                     }
                 });
-                recyclerView.setAdapter(adapterImage);
+                recyclerView.setAdapter(adapter);
                 Log.d("abc",response.body().getData().getListItems().toString());
                 // khoi tao adapter roi bo vao hien thi thoi e
                 progressBar.setVisibility(View.GONE);
@@ -132,27 +124,24 @@ public class ImageFragment extends Fragment {
             }
         });
     }
-    private void loadmore(){
-        new Handler().postDelayed(new Runnable() {
+    private void Loadmore(){
+        listItems.add(null);
+        adapter.notifyItemInserted(listItems.size() - 1);
+
+        Handler handler = new Handler();
+
+        handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                progressBar.setVisibility(View.VISIBLE);
-                APIUltil.getData().getWallpaper("list_item", "image", "1", "20").enqueue(new Callback<Wallpaper>() {
-                    @Override
-                    public void onResponse(Call<Wallpaper> call, Response<Wallpaper> response) {
-                        final List<ListItem> listItems = response.body().getData().getListItems();
-                        adapterImage.addImage(listItems);
-                        progressBar.setVisibility(View.GONE);
-                    }
+                listItems.remove(listItems.size() - 1);
+                int scrollPosition = listItems.size();
+                adapter.notifyItemRemoved(scrollPosition);
 
-                    @Override
-                    public void onFailure(Call<Wallpaper> call, Throwable t) {
-                        Log.e("FF", t.getMessage());
-
-                    }
-                });
+                adapter.notifyDataSetChanged();
+                isLoading = false;
             }
         }, 1500);
+
 
     }
 }

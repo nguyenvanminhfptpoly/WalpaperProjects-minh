@@ -3,7 +3,6 @@ package com.mgosu.walpaperprojects.view.detail;
 
 
 import android.Manifest;
-import android.app.DownloadManager;
 import android.app.ProgressDialog;
 import android.app.WallpaperManager;
 import android.content.ComponentName;
@@ -19,33 +18,35 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
+import android.service.wallpaper.WallpaperService;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import android.util.Log;
 import android.view.View;
+import android.widget.MediaController;
 import android.widget.Toast;
 
 
 import com.mgosu.walpaperprojects.R;
 
 import com.mgosu.walpaperprojects.data.model.home.Application;
+import com.mgosu.walpaperprojects.data.model.wallpaper.Wallpaper;
 import com.mgosu.walpaperprojects.databinding.ActivityDetailVideoBinding;
 import com.mgosu.walpaperprojects.data.model.wallpaper.ListItem;
 
 import com.mgosu.walpaperprojects.ultil.CheckConnection;
-import com.mgosu.walpaperprojects.view.home.MainActivity;
 import com.mgosu.walpaperprojects.view.service.MyWallpaperService;
-import com.squareup.picasso.Downloader;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -65,13 +66,14 @@ public class DetailVideoActivity extends AppCompatActivity {
         CheckConnect();
         initPermission();
         initPermission2();
+        initView();
     }
 
     private void CheckConnect() {
         if (CheckConnection.haveNetworkConnection(getApplicationContext())) {
             SetWall();
             GetInfomation();
-            initView();
+
         } else {
             CheckConnection.showToast_short(getApplicationContext(), "Connect Error");
         }
@@ -83,10 +85,9 @@ public class DetailVideoActivity extends AppCompatActivity {
         if (requestCode == 1) {
             if (grantResults.length == 1 &&
                     grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(getApplicationContext(), "Permision Write File is Granted", Toast.LENGTH_SHORT).show();
+                Log.d("permission", "Permission Success");
             } else {
-                Toast.makeText(getApplicationContext(), "Permision Write File is Denied", Toast.LENGTH_SHORT).show();
-
+                Log.d("permission", "Permission Failed");
             }
         } else {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -100,11 +101,9 @@ public class DetailVideoActivity extends AppCompatActivity {
                 //Permisson don't granted
                 if (shouldShowRequestPermissionRationale(
                         Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                    Toast.makeText(getApplicationContext(), "Permission isn't granted ", Toast.LENGTH_SHORT).show();
                 }
                 // Permisson don't granted and dont show dialog again.
                 else {
-                    Toast.makeText(getApplicationContext(), "Permisson don't granted and dont show dialog again ", Toast.LENGTH_SHORT).show();
                 }
                 //Register permission
                 requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
@@ -120,11 +119,9 @@ public class DetailVideoActivity extends AppCompatActivity {
                 //Permisson don't granted
                 if (shouldShowRequestPermissionRationale(
                         Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                    Toast.makeText(getApplicationContext(), "Permission isn't granted ", Toast.LENGTH_SHORT).show();
                 }
                 // Permisson don't granted and dont show dialog again.
                 else {
-                    Toast.makeText(getApplicationContext(), "Permisson don't granted and dont show dialog again ", Toast.LENGTH_SHORT).show();
                 }
                 //Register permission
                 requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
@@ -134,6 +131,7 @@ public class DetailVideoActivity extends AppCompatActivity {
     }
 
     private void initView() {
+        binding.toolbar.setTitle("Detail Video");
         setSupportActionBar(binding.toolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -149,24 +147,35 @@ public class DetailVideoActivity extends AppCompatActivity {
     private void GetInfomation() {
         ListItem item = (ListItem) getIntent().getSerializableExtra("videoinfo");
         videourl = "http://192.168.200.216/dev/media/calltools/wallpaper/" + item.getFileUrl();
-        new DownloadFileFromURL().execute(videourl);
-        binding.videoView2.setVideoURI(Uri.parse(videourl));
-        binding.videoView2.start();
-        binding.textView2.setText(item.getLoveCount() + "");
-        binding.textView3.setText(item.getDownload() + "");
-        binding.videoView2.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+        new DownloadFileFromURL(DetailVideoActivity.this).execute(videourl);
+
+        binding.videoView3.setVideoURI(Uri.parse(videourl));
+        binding.videoView3.start();
+        binding.textView5.setText(item.getLoveCount() + "");
+        binding.textView7.setText(item.getDownload() + "");
+        binding.videoView3.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
                 mp.setLooping(true);
-                binding.place.setVisibility(View.GONE);
+                binding.progressBar2.setVisibility(View.GONE);
             }
         });
+        MediaController mediaController = new MediaController(this);
+        mediaController.setAnchorView(binding.videoView3);
+        binding.videoView3.setMediaController(mediaController);
+
     }
 
     private void SetWall() {
-        binding.button.setOnClickListener(new View.OnClickListener() {
+        binding.button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                WallpaperManager instance = WallpaperManager.getInstance(DetailVideoActivity.this);
+                try {
+                    instance.clear();
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
                 Intent intent = new Intent(
                         WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
                 intent.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
@@ -176,8 +185,12 @@ public class DetailVideoActivity extends AppCompatActivity {
         });
     }
 
+    class DownloadFileFromURL extends AsyncTask<String, Integer, String> {
+        public Context context;
 
-    class DownloadFileFromURL extends AsyncTask<String, String, String> {
+        public DownloadFileFromURL(Context context) {
+            this.context = context;
+        }
 
         /**
          * Before starting background thread
@@ -200,24 +213,19 @@ public class DetailVideoActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(String... f_url) {
             int count;
-
             try {
                 String root = Environment.getExternalStorageDirectory().toString();
-
-
                 URL url = new URL(f_url[0]);
-
-                URLConnection conection = url.openConnection();
-                conection.connect();
-                int lenghtOfFile = conection.getContentLength();
+                URLConnection connection = url.openConnection();
+                connection.connect();
+                int lenghtOfFile = connection.getContentLength();
                 // input stream to read file - with 8k buffer
                 InputStream input = new BufferedInputStream(url.openStream(), 8192);
-
                 // Output stream to write file
-                Application.path = root + "/downloadedfile.mp4";
-
-                Log.d("///", Application.path);
+                Application.path = root +"/video.mp4";
+                Log.d("fileN", Application.path);
                 OutputStream output = new FileOutputStream(Application.path);
+
                 byte data[] = new byte[1024];
 
                 long total = 0;
@@ -225,15 +233,11 @@ public class DetailVideoActivity extends AppCompatActivity {
                     total += count;
                     // publishing the progress....
                     // After this onProgressUpdate will be called
-
                     // writing data to file
                     output.write(data, 0, count);
                 }
-
-
                 // flushing output
                 output.flush();
-
                 // closing streams
                 output.close();
                 input.close();
@@ -241,19 +245,14 @@ public class DetailVideoActivity extends AppCompatActivity {
             } catch (Exception e) {
                 Log.e("Error: ", e.getMessage());
             }
-
             return null;
         }
-
-
         /**
          * After completing background task
          **/
         @Override
         protected void onPostExecute(String file_url) {
-            System.out.println("Downloaded");
 
-            progressBar.dismiss();
         }
 
     }

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/contr_video"
     android:layout_width="match_parent"
-    android:layout_height="400dp">
+    android:layout_height="600dp">
 
     <VideoView
         android:id="@+id/videoView"
@@ -45,7 +45,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
-            android:text="@string/lovecount"
             android:textColor="@color/den" />
 
 
@@ -61,7 +60,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
-            android:text="@string/downcount2"
             android:textColor="@color/den" />
 
     </LinearLayout>

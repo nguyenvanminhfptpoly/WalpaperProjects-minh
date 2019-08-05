@@ -7,8 +7,12 @@
     <uses-permission android:name="android.permission.SET_WALLPAPER" />
     <uses-permission android:name="android.permission.SET_WALLPAPER_HINTS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <uses-feature
+        android:name="android.software.live_wallpaper"
+        android:required="true"></uses-feature>
 
     <application
         android:allowBackup="true"
@@ -17,22 +21,22 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <service
             android:name=".view.service.MyWallpaperService"
             android:enabled="true"
             android:label="Wallpaper Example "
-            android:permission="android.permission.BIND_WALLPAPER" >
+            android:permission="android.permission.BIND_WALLPAPER">
             <intent-filter>
-                <action android:name="android.service.wallpaper.WallpaperService" >
-                </action>
+                <action android:name="android.service.wallpaper.WallpaperService"></action>
             </intent-filter>
 
             <meta-data
                 android:name="android.service.wallpaper"
-                android:resource="@xml/wallpaper" >
-            </meta-data>
+                android:resource="@xml/wallpaper"></meta-data>
         </service>
-        <activity android:name=".view.detail.DetailLiveActivity"></activity>
+
+        <activity android:name=".view.detail.DetailLiveActivity" />
         <activity android:name=".view.detail.DetailVideoActivity" />
         <activity android:name=".view.detail.DetailActivity" />
         <activity
@@ -46,8 +50,5 @@
             </intent-filter>
         </activity>
     </application>
-    <uses-feature
-        android:name="android.software.live_wallpaper"
-        android:required="true" >
-    </uses-feature>
+
 </manifest>

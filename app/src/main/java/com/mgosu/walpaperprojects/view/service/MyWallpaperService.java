@@ -3,6 +3,7 @@ package com.mgosu.walpaperprojects.view.service;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Handler;
 import android.service.wallpaper.WallpaperService;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -34,6 +35,7 @@ public class MyWallpaperService extends WallpaperService {
     }
 
     class VideoEngine extends Engine {
+
         @Override
         public void onSurfaceCreated(SurfaceHolder holder) {
             super.onSurfaceCreated(holder);

@@ -21,14 +21,14 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="love_count" />
-    <string name="lovecount">Love Count</string>
+    <string name="lovecount"></string>
     <string name="downcount" />
-    <string name="downcount2">Download count</string>
+    <string name="downcount2"></string>
     <string name="setwall">Set Wallpaper</string>
     <string name="title_dialog" />
     <string name="title">Set Wallpaper for</string>
     <string name="btn_lock">Lock Screen</string>
-    <string name="btn_home" >Home Screen</string>
+    <string name="btn_home">Home Screen</string>
     <string name="exit">Cancel</string>
     <string name="both">Both</string>
 

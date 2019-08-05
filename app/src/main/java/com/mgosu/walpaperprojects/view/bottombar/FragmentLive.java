@@ -21,6 +21,7 @@ import com.mgosu.walpaperprojects.data.model.wallpaper.ListItem;
 import com.mgosu.walpaperprojects.data.model.wallpaper.Wallpaper;
 import com.mgosu.walpaperprojects.ultil.APIUltil;
 import com.mgosu.walpaperprojects.ultil.OnItemListener;
+import com.mgosu.walpaperprojects.view.adapter.RecyclerviewAdapter;
 import com.mgosu.walpaperprojects.view.detail.DetailActivity;
 import com.mgosu.walpaperprojects.view.detail.DetailLiveActivity;
 
@@ -39,15 +40,13 @@ public class FragmentLive extends Fragment {
     private RecyclerView.LayoutManager layoutManager;
     private RecyclerView recyclerView;
 
-    private AdapterImage adapterImage;
+//    private AdapterImage adapterImage;
     private ProgressBar progressBar;
-    private int mPageNumer = 1;
-    private int mTotalItem = 10;
+    List<ListItem> listItems;
+    private RecyclerviewAdapter adapter;
+    Handler handler;
 
-    private boolean isLoading = true;
-    private int visibleitem, visibleItemCount, totalItem, pre_item = 0;
-    private int view_the = 10;
-
+    boolean isLoading = false;
     public FragmentLive() {
         // Required empty public constructor
 
@@ -78,6 +77,8 @@ public class FragmentLive extends Fragment {
             CheckConnection.showToast_short(getActivity(), "Connect Error");
         }
     }
+
+
     private void AddOnScrollRecyclerview(){
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -88,34 +89,27 @@ public class FragmentLive extends Fragment {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                visibleItemCount = layoutManager.getChildCount();
-                totalItem = layoutManager.getItemCount();
-                visibleitem = ((GridLayoutManager) recyclerView.getLayoutManager()).findFirstVisibleItemPosition();
-                if (dy > 0) {
-                    if (isLoading) {
-                        if (totalItem > pre_item) {
-                            isLoading = false;
-                            pre_item = totalItem;
-                        }
-                    }
-                    if (!isLoading && (totalItem - visibleItemCount) <= (visibleitem + view_the)) {
-                        mPageNumer++;
-                        loadMore();
+               layoutManager = (GridLayoutManager) recyclerView.getLayoutManager();
+                if(!isLoading){
+                    if(layoutManager != null && ((GridLayoutManager) layoutManager).findLastCompletelyVisibleItemPosition() == listItems.size() - 1){
+                        Loadmore();
                         isLoading = true;
                     }
                 }
             }
         });
     }
+
+
     private void GetDataFromAPI(){
         progressBar.setVisibility(View.VISIBLE);
         APIUltil.getData().getWallpaper("list_item", "3d", "1", "20").enqueue(new Callback<Wallpaper>() {
             @Override
             public void onResponse(Call<Wallpaper> call, Response<Wallpaper> response) {
-                final List<ListItem> listItems = response.body().getData().getListItems();
+                listItems = response.body().getData().getListItems();
 
 
-                adapterImage = new AdapterImage(listItems, getActivity(), new OnItemListener() {
+                adapter = new RecyclerviewAdapter(listItems, getActivity(), new OnItemListener() {
                     @Override
                     public void OnItemlistener(int position) {
                         Intent intent = new Intent(getActivity(), DetailLiveActivity.class);
@@ -123,7 +117,7 @@ public class FragmentLive extends Fragment {
                         startActivity(intent);
                     }
                 });
-                recyclerView.setAdapter(adapterImage);
+                recyclerView.setAdapter(adapter);
                 Log.d("abc", response.body().getData().getListItems().toString());
                 // khoi tao adapter roi bo vao hien thi thoi e
                 progressBar.setVisibility(View.GONE);
@@ -136,27 +130,50 @@ public class FragmentLive extends Fragment {
             }
         });
     }
-    private void loadMore() {
-        new Handler().postDelayed(new Runnable() {
+//    private void loadMore() {
+//        new Handler().postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                progressBar.setVisibility(View.VISIBLE);
+//                APIUltil.getData().getWallpaper("list_item", "3d", "1", "20").enqueue(new Callback<Wallpaper>() {
+//                    @Override
+//                    public void onResponse(Call<Wallpaper> call, Response<Wallpaper> response) {
+//                        final List<ListItem> listItems = response.body().getData().getListItems();
+//                        adapterImage.addImage(listItems);
+//                        progressBar.setVisibility(View.GONE);
+//                    }
+//
+//                    @Override
+//                    public void onFailure(Call<Wallpaper> call, Throwable t) {
+//                        Log.e("FF", t.getMessage());
+//
+//                    }
+//                });
+//            }
+//        }, 1500);
+//
+//    }
+
+
+    private void Loadmore(){
+        listItems.add(null);
+        adapter.notifyItemInserted(listItems.size() - 1);
+
+        Handler handler = new Handler();
+
+        handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                progressBar.setVisibility(View.VISIBLE);
-                APIUltil.getData().getWallpaper("list_item", "3d", "1", "20").enqueue(new Callback<Wallpaper>() {
-                    @Override
-                    public void onResponse(Call<Wallpaper> call, Response<Wallpaper> response) {
-                        final List<ListItem> listItems = response.body().getData().getListItems();
-                        adapterImage.addImage(listItems);
-                        progressBar.setVisibility(View.GONE);
-                    }
+                listItems.remove(listItems.size() - 1);
+                int scrollPosition = listItems.size();
+                adapter.notifyItemRemoved(scrollPosition);
 
-                    @Override
-                    public void onFailure(Call<Wallpaper> call, Throwable t) {
-                        Log.e("FF", t.getMessage());
-
-                    }
-                });
+                adapter.notifyDataSetChanged();
+                isLoading = false;
             }
         }, 1500);
 
+
     }
+
 }
