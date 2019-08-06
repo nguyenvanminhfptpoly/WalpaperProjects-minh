@@ -49,6 +49,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Random;
 
 
 public class DetailVideoActivity extends AppCompatActivity {
@@ -56,16 +57,14 @@ public class DetailVideoActivity extends AppCompatActivity {
     private String videourl;
     private ProgressDialog progressBar;
     private String path;
+    private ListItem item;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_detail_video);
-
         CheckConnect();
-        initPermission();
-        initPermission2();
         initView();
     }
 
@@ -73,62 +72,12 @@ public class DetailVideoActivity extends AppCompatActivity {
         if (CheckConnection.haveNetworkConnection(getApplicationContext())) {
             SetWall();
             GetInfomation();
-
         } else {
             CheckConnection.showToast_short(getApplicationContext(), "Connect Error");
         }
 
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == 1) {
-            if (grantResults.length == 1 &&
-                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Log.d("permission", "Permission Success");
-            } else {
-                Log.d("permission", "Permission Failed");
-            }
-        } else {
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
-    }
-
-    public void initPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-
-                //Permisson don't granted
-                if (shouldShowRequestPermissionRationale(
-                        Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                }
-                // Permisson don't granted and dont show dialog again.
-                else {
-                }
-                //Register permission
-                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
-
-            }
-        }
-    }
-
-    public void initPermission2() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-
-                //Permisson don't granted
-                if (shouldShowRequestPermissionRationale(
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                }
-                // Permisson don't granted and dont show dialog again.
-                else {
-                }
-                //Register permission
-                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-
-            }
-        }
-    }
 
     private void initView() {
         binding.toolbar.setTitle("Detail Video");
@@ -145,9 +94,9 @@ public class DetailVideoActivity extends AppCompatActivity {
     }
 
     private void GetInfomation() {
-        ListItem item = (ListItem) getIntent().getSerializableExtra("videoinfo");
+         item = (ListItem) getIntent().getSerializableExtra("videoinfo");
         videourl = "http://192.168.200.216/dev/media/calltools/wallpaper/" + item.getFileUrl();
-        new DownloadFileFromURL(DetailVideoActivity.this).execute(videourl);
+        new DownloadFileFromURL(DetailVideoActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,videourl);
 
         binding.videoView3.setVideoURI(Uri.parse(videourl));
         binding.videoView3.start();
@@ -170,6 +119,7 @@ public class DetailVideoActivity extends AppCompatActivity {
         binding.button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 WallpaperManager instance = WallpaperManager.getInstance(DetailVideoActivity.this);
                 try {
                     instance.clear();
@@ -222,7 +172,7 @@ public class DetailVideoActivity extends AppCompatActivity {
                 // input stream to read file - with 8k buffer
                 InputStream input = new BufferedInputStream(url.openStream(), 8192);
                 // Output stream to write file
-                Application.path = root +"/video.mp4";
+                Application.path = root +"/video_" + (item.getItemId()) +".mp4";
                 Log.d("fileN", Application.path);
                 OutputStream output = new FileOutputStream(Application.path);
 
@@ -233,6 +183,7 @@ public class DetailVideoActivity extends AppCompatActivity {
                     total += count;
                     // publishing the progress....
                     // After this onProgressUpdate will be called
+                    publishProgress((int) (total * 100/lenghtOfFile));
                     // writing data to file
                     output.write(data, 0, count);
                 }
