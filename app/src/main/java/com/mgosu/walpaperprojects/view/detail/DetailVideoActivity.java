@@ -3,10 +3,12 @@ package com.mgosu.walpaperprojects.view.detail;
 
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.app.WallpaperManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
@@ -18,6 +20,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
 import android.service.wallpaper.WallpaperService;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -37,6 +40,8 @@ import com.mgosu.walpaperprojects.databinding.ActivityDetailVideoBinding;
 import com.mgosu.walpaperprojects.data.model.wallpaper.ListItem;
 
 import com.mgosu.walpaperprojects.ultil.CheckConnection;
+import com.mgosu.walpaperprojects.view.bottombar.VideoFragment;
+import com.mgosu.walpaperprojects.view.home.MainActivity;
 import com.mgosu.walpaperprojects.view.service.MyWallpaperService;
 
 import java.io.BufferedInputStream;
@@ -58,6 +63,7 @@ public class DetailVideoActivity extends AppCompatActivity {
     private ProgressDialog progressBar;
     private String path;
     private ListItem item;
+    private ProgressDialog dialog;
 
 
     @Override
@@ -85,6 +91,8 @@ public class DetailVideoActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         binding.toolbar.setSubtitleTextColor(Color.WHITE);
+        binding.toolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
+        dialog = new ProgressDialog(DetailVideoActivity.this);
     }
 
     @Override
@@ -94,45 +102,91 @@ public class DetailVideoActivity extends AppCompatActivity {
     }
 
     private void GetInfomation() {
-         item = (ListItem) getIntent().getSerializableExtra("videoinfo");
+        item = (ListItem) getIntent().getSerializableExtra("videoinfo");
         videourl = "http://192.168.200.216/dev/media/calltools/wallpaper/" + item.getFileUrl();
-        new DownloadFileFromURL(DetailVideoActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,videourl);
 
         binding.videoView3.setVideoURI(Uri.parse(videourl));
-        binding.videoView3.start();
+
         binding.textView5.setText(item.getLoveCount() + "");
         binding.textView7.setText(item.getDownload() + "");
+        binding.videoView3.setKeepScreenOn(true);
+
+        binding.videoView3.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mediaPlayer) {
+                binding.videoView3.seekTo(1);
+                binding.videoView3.start();
+                Log.d("ff", "onCompletion: ");
+            }
+        });
         binding.videoView3.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
-                mp.setLooping(true);
                 binding.progressBar2.setVisibility(View.GONE);
             }
         });
-        MediaController mediaController = new MediaController(this);
-        mediaController.setAnchorView(binding.videoView3);
-        binding.videoView3.setMediaController(mediaController);
-
+        binding.videoView3.start();
     }
 
     private void SetWall() {
         binding.button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                dialog.setMessage("Please Wait...");
+                dialog.show();
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (CheckConnection.haveNetworkConnection(DetailVideoActivity.this)) {
+                            new DownloadFileFromURL(DetailVideoActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, videourl);
+                            dialog.dismiss();
+                            WallpaperManager instance = WallpaperManager.getInstance(DetailVideoActivity.this);
+                            try {
+                                instance.clear();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
 
-                WallpaperManager instance = WallpaperManager.getInstance(DetailVideoActivity.this);
-                try {
-                    instance.clear();
-                }catch (Exception e){
-                    e.printStackTrace();
-                }
-                Intent intent = new Intent(
-                        WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
-                intent.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
-                        new ComponentName(DetailVideoActivity.this, MyWallpaperService.class));
-                startActivity(intent);
+                            Intent intent = new Intent(
+                                    WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
+                            intent.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
+                                    new ComponentName(DetailVideoActivity.this, MyWallpaperService.class));
+                            startActivity(intent);
+
+                        } else {
+                            Toast.makeText(DetailVideoActivity.this, "Connect Error", Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+                }, 4000);
+
             }
         });
+    }
+
+    private void ShowDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Video Wallpaper");
+        builder.setMessage("Successfully!");
+        builder.setCancelable(false);
+        builder.setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                finish();
+            }
+        });
+        builder.setNegativeButton("Preview", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Intent startMain = new Intent(Intent.ACTION_MAIN);
+                startMain.addCategory(Intent.CATEGORY_HOME);
+                startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(startMain);
+            }
+        });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+
     }
 
     class DownloadFileFromURL extends AsyncTask<String, Integer, String> {
@@ -149,7 +203,6 @@ public class DetailVideoActivity extends AppCompatActivity {
         protected void onPreExecute() {
             super.onPreExecute();
             System.out.println("Starting download");
-
             progressBar = new ProgressDialog(DetailVideoActivity.this);
             progressBar.setMessage("Loading... Please wait...");
             progressBar.setIndeterminate(false);
@@ -163,16 +216,17 @@ public class DetailVideoActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(String... f_url) {
             int count;
+            String param  = f_url[0];
             try {
                 String root = Environment.getExternalStorageDirectory().toString();
-                URL url = new URL(f_url[0]);
+                URL url = new URL(param);
                 URLConnection connection = url.openConnection();
                 connection.connect();
                 int lenghtOfFile = connection.getContentLength();
                 // input stream to read file - with 8k buffer
                 InputStream input = new BufferedInputStream(url.openStream(), 8192);
                 // Output stream to write file
-                Application.path = root +"/video_" + (item.getItemId()) +".mp4";
+                Application.path = root + "/" + (item.getItemId()) + ".mp4";
                 Log.d("fileN", Application.path);
                 OutputStream output = new FileOutputStream(Application.path);
 
@@ -183,7 +237,7 @@ public class DetailVideoActivity extends AppCompatActivity {
                     total += count;
                     // publishing the progress....
                     // After this onProgressUpdate will be called
-                    publishProgress((int) (total * 100/lenghtOfFile));
+                    publishProgress((int) (total * 100 / lenghtOfFile));
                     // writing data to file
                     output.write(data, 0, count);
                 }
@@ -198,6 +252,7 @@ public class DetailVideoActivity extends AppCompatActivity {
             }
             return null;
         }
+
         /**
          * After completing background task
          **/

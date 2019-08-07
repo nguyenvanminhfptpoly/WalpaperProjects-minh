@@ -1,9 +1,12 @@
 package com.mgosu.walpaperprojects.view.home;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
@@ -17,6 +20,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+import android.widget.Toast;
 
 import com.mgosu.walpaperprojects.R;
 import com.mgosu.walpaperprojects.view.bottombar.FragmentLive;
@@ -74,7 +78,8 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         loadFragment(new VideoFragment());
-        initPermission2();
+        initPermission();
+
     }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -90,18 +95,18 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
-
-    public void initPermission2() {
+    public void initPermission(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
                 //Permisson don't granted
                 if (shouldShowRequestPermissionRationale(
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                        Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                    Log.d("Permission", "initPermission: yes ");
                 }
                 // Permisson don't granted and dont show dialog again.
                 else {
+                    Log.d("Permission 2", "initPermission: no");
                 }
                 //Register permission
                 requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
@@ -109,6 +114,8 @@ public class MainActivity extends AppCompatActivity
             }
         }
     }
+
+
 
     @Override
     public void onBackPressed() {

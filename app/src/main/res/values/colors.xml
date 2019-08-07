@@ -9,4 +9,6 @@
   <color name="black2">#40111010</color>
   <color name="den">#222121</color>
     <color name="wwhiteblur">#3AFFFFFF</color>
+    <color name="tran">#80000000</color>
+
 </resources>

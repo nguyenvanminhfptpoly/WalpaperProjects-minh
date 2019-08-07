@@ -7,6 +7,7 @@ import android.app.WallpaperManager;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -18,8 +19,10 @@ import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -68,6 +71,8 @@ public class DetailActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         binding.toolbar2.setSubtitleTextColor(Color.WHITE);
+        binding.toolbar2.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
+
 
         binding.button3.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,102 +86,105 @@ public class DetailActivity extends AppCompatActivity {
                 builder.setView(v1);
                 final Dialog dialog = builder.create();
                 dialog.show();
+                if(CheckConnection.haveNetworkConnection(getApplicationContext())) {
+                    btnBoth.setOnClickListener(new View.OnClickListener() {
+                        @RequiresApi(api = Build.VERSION_CODES.N)
+                        @Override
+                        public void onClick(View view) {
+                            GetScreenWidthHeight();
+                            final Bitmap bitmapImg = ((BitmapDrawable) binding.imageView3.getDrawable()).getBitmap();
+                            final WallpaperManager wallManager = WallpaperManager.getInstance(getApplicationContext());
+                            progressDialog.setMessage("Please Wait...");
+                            progressDialog.show();
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                            // On Android N and above use the new API to set both the general system wallpaper and
+                                            // the lock-screen-specific wallpaper
+                                            wallManager.setBitmap(bitmapImg, null, true, WallpaperManager.FLAG_SYSTEM | WallpaperManager.FLAG_LOCK);
+                                            progressDialog.dismiss();
+                                        } else {
+                                            wallManager.setBitmap(bitmapImg);
+                                            progressDialog.dismiss();
+                                        }
+                                        Toast.makeText(DetailActivity.this, "Successfully", Toast.LENGTH_SHORT).show();
+                                        dialog.dismiss();
+                                    } catch (IOException ex) {
+                                        ex.printStackTrace();
+                                    }
+                                }
+                            }, 1500);
 
-                btnBoth.setOnClickListener(new View.OnClickListener() {
-                    @RequiresApi(api = Build.VERSION_CODES.N)
-                    @Override
-                    public void onClick(View view) {
-                        GetScreenWidthHeight();
-                        final Bitmap bitmapImg = ((BitmapDrawable) binding.imageView3.getDrawable()).getBitmap();
-                        final WallpaperManager wallManager = WallpaperManager.getInstance(getApplicationContext());
-                        progressDialog.setMessage("Please Wait...");
-                        progressDialog.show();
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                                        // On Android N and above use the new API to set both the general system wallpaper and
-                                        // the lock-screen-specific wallpaper
-                                        wallManager.setBitmap(bitmapImg, null, true, WallpaperManager.FLAG_SYSTEM | WallpaperManager.FLAG_LOCK);
-                                    progressDialog.dismiss();
-                                    } else {
+                        }
+                    });
+                    btnHome.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            GetScreenWidthHeight();
+                            final Bitmap bitmapImg = ((BitmapDrawable) binding.imageView3.getDrawable()).getBitmap();
+                            final WallpaperManager wallManager = WallpaperManager.getInstance(getApplicationContext());
+                            progressDialog.setMessage("Please Wait ...");
+                            progressDialog.show();
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        wallManager.clear();
                                         wallManager.setBitmap(bitmapImg);
                                         progressDialog.dismiss();
+                                        Toast.makeText(DetailActivity.this, "Successfully", Toast.LENGTH_SHORT).show();
+                                        dialog.dismiss();
+                                    } catch (IOException ex) {
                                     }
-                                    Toast.makeText(DetailActivity.this, "Successfully", Toast.LENGTH_SHORT).show();
-                                    dialog.dismiss();
-                                } catch (IOException ex) {
-                                    ex.printStackTrace();
                                 }
-                            }
-                        }, 1500);
+                            }, 1500);
 
-                    }
-                });
-                btnHome.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        GetScreenWidthHeight();
-                        final Bitmap bitmapImg = ((BitmapDrawable) binding.imageView3.getDrawable()).getBitmap();
-                        final WallpaperManager wallManager = WallpaperManager.getInstance(getApplicationContext());
-                        progressDialog.setMessage("Please Wait ...");
-                        progressDialog.show();
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    wallManager.clear();
-                                    wallManager.setBitmap(bitmapImg);
-                                    progressDialog.dismiss();
-                                    Toast.makeText(DetailActivity.this, "Successfully", Toast.LENGTH_SHORT).show();
-                                    dialog.dismiss();
-                                } catch (IOException ex) {
-                                }
-                            }
-                        }, 1500);
+                        }
+                    });
+                    btnLock.setOnClickListener(new View.OnClickListener() {
 
-                    }
-                });
-                btnLock.setOnClickListener(new View.OnClickListener() {
-
-                    @RequiresApi(api = Build.VERSION_CODES.N)
-                    @Override
-                    public void onClick(View view) {
-                        GetScreenWidthHeight();
-                        final Bitmap bitmapImg = ((BitmapDrawable) binding.imageView3.getDrawable()).getBitmap();
-                        final WallpaperManager wallManager = WallpaperManager.getInstance(getApplicationContext());
-                       progressDialog.setMessage("please wait...");
-                       progressDialog.show();
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                                        // On Android N and above use the new API to set both the general system wallpaper and
-                                        // the lock-screen-specific wallpaper
-                                        wallManager.setBitmap(bitmapImg, null, true, WallpaperManager.FLAG_LOCK);
-                                        progressDialog.dismiss();
-                                    } else {
-                                        wallManager.setBitmap(bitmapImg);
-                                        progressDialog.dismiss();
+                        @RequiresApi(api = Build.VERSION_CODES.N)
+                        @Override
+                        public void onClick(View view) {
+                            GetScreenWidthHeight();
+                            final Bitmap bitmapImg = ((BitmapDrawable) binding.imageView3.getDrawable()).getBitmap();
+                            final WallpaperManager wallManager = WallpaperManager.getInstance(getApplicationContext());
+                            progressDialog.setMessage("please wait...");
+                            progressDialog.show();
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                            // On Android N and above use the new API to set both the general system wallpaper and
+                                            // the lock-screen-specific wallpaper
+                                            wallManager.setBitmap(bitmapImg, null, true, WallpaperManager.FLAG_LOCK);
+                                            progressDialog.dismiss();
+                                        } else {
+                                            wallManager.setBitmap(bitmapImg);
+                                            progressDialog.dismiss();
+                                        }
+                                        Toast.makeText(DetailActivity.this, "Successfully", Toast.LENGTH_SHORT).show();
+                                        dialog.dismiss();
+                                    } catch (IOException ex) {
                                     }
-                                    Toast.makeText(DetailActivity.this, "Successfully", Toast.LENGTH_SHORT).show();
-                                    dialog.dismiss();
-                                } catch (IOException ex) {
                                 }
-                            }
-                        }, 1500);
+                            }, 1500);
 
-                    }
-                });
-
+                        }
+                    });
+                }else {
+                    Toast.makeText(DetailActivity.this, "Connect Error", Toast.LENGTH_SHORT).show();
+                }
                 tvCancel.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         dialog.dismiss();
                     }
                 });
+
             }
         });
 
@@ -186,7 +194,7 @@ public class DetailActivity extends AppCompatActivity {
         ListItem listItem = (ListItem) getIntent().getSerializableExtra("imageinfo");
         Glide.with(getApplicationContext())
                 .asBitmap()
-                .load("http://192.168.200.216/dev/media/calltools/wallpaper/" + listItem.getFileUrl())
+                .load("http://192.168.200.216/dev/media/calltools/wallpaper/" + listItem.getThumbLarge())
                 .error(R.drawable.imgerror)
                 .into(new CustomTarget<Bitmap>() {
                     @Override
@@ -205,16 +213,18 @@ public class DetailActivity extends AppCompatActivity {
 
 
     public void GetScreenWidthHeight() {
-
-        displayMetrics = new DisplayMetrics();
-
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-
-        width = getWindowManager().getDefaultDisplay().getWidth();
-
-        height = getWindowManager().getDefaultDisplay()
-                .getHeight();
-
+        if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB_MR2) {
+            displayMetrics = new DisplayMetrics();
+             width = displayMetrics.widthPixels;
+             height = displayMetrics.heightPixels;
+        } else {
+            displayMetrics = new DisplayMetrics();
+            Point size = new Point();
+            WindowManager windowManager = getWindowManager();
+            windowManager.getDefaultDisplay().getSize(size);
+             width = size.x;
+             height = size.y;
+        }
     }
 
     @Override

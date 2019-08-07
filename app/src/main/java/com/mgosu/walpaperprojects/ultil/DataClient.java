@@ -16,6 +16,7 @@ public interface DataClient {
     //cat_type:video↵↵1
     //page:1
     //limit:20
+
 @FormUrlEncoded
 @POST("dev/wallpaper.php")
 Call<Wallpaper> getWallpaper(@Field("type") String type,

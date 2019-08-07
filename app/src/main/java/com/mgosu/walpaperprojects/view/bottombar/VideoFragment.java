@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.mgosu.walpaperprojects.R;
 import com.mgosu.walpaperprojects.ultil.CheckConnection;
@@ -108,9 +109,13 @@ public class VideoFragment extends Fragment {
                 adapter = new RecyclerviewAdapter(listItems, getActivity(), new OnItemListener() {
                     @Override
                     public void OnItemlistener(int position) {
-                        Intent intent = new Intent(getActivity(), DetailVideoActivity.class);
-                        intent.putExtra("videoinfo", listItems.get(position));
-                        startActivity(intent);
+                        if(CheckConnection.haveNetworkConnection(getActivity())) {
+                            Intent intent = new Intent(getActivity(), DetailVideoActivity.class);
+                            intent.putExtra("videoinfo", listItems.get(position));
+                            startActivity(intent);
+                        }else {
+                            Toast.makeText(getActivity(), "Connect Error", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 });
                 recyclerView.setAdapter(adapter);
