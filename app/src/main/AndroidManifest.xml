@@ -22,8 +22,12 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
-        android:networkSecurityConfig="@xml/network_security_config">
-
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:configChanges="screenSize|smallestScreenSize|screenLayout"
+        >
+        <meta-data
+            android:name="android.allow_multiple_resumed_activities"
+            android:value="true" />
         <service
             android:name=".view.service.MyWallpaperService"
             android:enabled="true"

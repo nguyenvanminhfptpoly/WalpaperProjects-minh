@@ -79,7 +79,8 @@ public class MainActivity extends AppCompatActivity
 
         loadFragment(new VideoFragment());
         initPermission();
-
+        settingPermission();
+        initPermission2();
     }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -95,13 +96,22 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    public void settingPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.System.canWrite(getApplicationContext())) {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS, Uri.parse("package:" + getPackageName()));
+                startActivityForResult(intent, 200);
+
+            }
+        }
+    }
     public void initPermission(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
                 //Permisson don't granted
                 if (shouldShowRequestPermissionRationale(
-                        Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                     Log.d("Permission", "initPermission: yes ");
                 }
                 // Permisson don't granted and dont show dialog again.
@@ -115,7 +125,25 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    public void initPermission2(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
+                //Permisson don't granted
+                if (shouldShowRequestPermissionRationale(
+                        Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                    Log.d("Permission", "initPermission: yes ");
+                }
+                // Permisson don't granted and dont show dialog again.
+                else {
+                    Log.d("Permission 2", "initPermission: no");
+                }
+                //Register permission
+                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+
+            }
+        }
+    }
 
     @Override
     public void onBackPressed() {

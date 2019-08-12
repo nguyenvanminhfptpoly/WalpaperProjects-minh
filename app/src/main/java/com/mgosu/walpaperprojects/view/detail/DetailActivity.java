@@ -194,7 +194,7 @@ public class DetailActivity extends AppCompatActivity {
         ListItem listItem = (ListItem) getIntent().getSerializableExtra("imageinfo");
         Glide.with(getApplicationContext())
                 .asBitmap()
-                .load("http://192.168.200.216/dev/media/calltools/wallpaper/" + listItem.getThumbLarge())
+                .load("http://192.168.200.216/dev/media/calltools/wallpaper/" + listItem.getFileUrl())
                 .error(R.drawable.imgerror)
                 .into(new CustomTarget<Bitmap>() {
                     @Override
